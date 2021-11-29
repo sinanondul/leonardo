@@ -4,13 +4,15 @@ Test
 A logistics company has asked us to manage the transport of used vehicles. For this you need to know
 
 Booking
-* loading port
-* discharge port
+* Booking Number (unique)
+* Loading port
+* Discharge port
 * Ship arrival date
-* Boat departure date
+* Ship departure date
 
 Vehicle
-* Registration
+* VIN (Vehicle Identification Number: unique)
+* Make
 * Model
 * Weight
 
@@ -20,7 +22,7 @@ Goals:
 -----
 
 * Create a django (version> = 2) app that can make a CRUD of bookings and is able to associate / disassociate used vehicles. You can give all the assumptions you want.
-* Include a README.md file describing the app, decisions and technical considerations that you have taken as well as any type of improvements that could be applied.
+* Include a SOLUTION.md file describing the app, decisions and technical considerations that you have taken as well as any type of improvements that could be applied.
 
 Bonus:
 ------
@@ -36,7 +38,7 @@ Bonus:
 Observations:
 -------------
 
-This test can take a couple of hours to do, but we know that sometimes it is hard to find the time to do it, so you have up to a week of time to make it. Even so, don't worry if you run out of time. In the technical meeting you can argue it in oral way.
+This test can take some hours to make it but, as we know that sometimes it is hard to find the time to do it, you'll have up to a week of time to make it. Even so, don't worry if you run out of time. In the technical meeting you can argue it in oral way.
 
 Quickstart:
 -----------
