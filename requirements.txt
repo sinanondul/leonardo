@@ -1,2 +1,8 @@
-Django==2.2.24
-django-debug-toolbar==3.2.2
+# BASE
+Django==4.2.11  # https://www.djangoproject.com/
+django-debug-toolbar==4.4.2  # https://github.com/jazzband/django-debug-toolbar
+
+# RECOMMENDATIONS
+# django_tables2==2.7.0  # https://github.com/jieter/django-tables2/
+# XlsxWriter==3.2.0  # https://github.com/jmcnamara/XlsxWriter
+# djangorestframework==3.15.1  # https://github.com/encode/django-rest-framework

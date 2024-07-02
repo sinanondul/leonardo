@@ -21,24 +21,24 @@ It is intended that an exercise be done to make a CRUD of Bookings that will tra
 Goals:
 -----
 
-* Create a django (version> = 2) app that can make a CRUD of bookings and is able to associate / disassociate used vehicles. You can give all the assumptions you want.
+* Create a django app that can make a CRUD of bookings and is able to associate / disassociate used vehicles. You can give all the assumptions you want.
+* Make basic API REST with Django Rest Framework
+* Make a Command to delete all vehicles with a booking ship arrival date older than 6 months. If you prefer you can make an endpoint instead of a Command.
 * Include a SOLUTION.md file describing the app, decisions and technical considerations that you have taken as well as any type of improvements that could be applied.
 
 Bonus:
 ------
 
 * Make this app reusable
-* Make tests (backend / frontend)
 * Make export results to XLS / PDF or import XLS files
+* Make tests (backend / frontend)
 * Make the frontend attractive
-* Make API REST with Django Rest Framework
-* Make a little application with Vue / React
 
 
 Observations:
 -------------
 
-This test can take some hours to make it but, as we know that sometimes it is hard to find the time to do it, you'll have up to a week of time to make it. Even so, don't worry if you run out of time. In the technical meeting you can argue it in oral way.
+This test can take some hours to make it but, as we know that sometimes it is hard to find the time to do it, you'll have up to a week of time to make it. Even so, don't worry if you run out of time. In the technical meeting we can discuss it.
 
 Quickstart:
 -----------
@@ -50,7 +50,7 @@ You can clone this repo and work with it locally:
 git clone https://github.com/vilamatica/ultramar-test.git
 
 # Create a virtualenv
-python3 -m venv venv
+python3.12 -m venv ven
 . venv/bin/activate
 
 # Install dependencies
