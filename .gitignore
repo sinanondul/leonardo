@@ -6,7 +6,7 @@ ven
 
 .idea
 
-*.pyc
+-*.pyc
 __pycache__/
 
 instance/
