@@ -67,12 +67,32 @@ class BookingViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def export_excel(self, request):
+        """
+        Export bookings as Excel
+        """
         resource = BookingResource()
         dataset = resource.export()
-        response = HttpResponse(dataset.xls, content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment; filename="bookings.xls"'
-        return response
 
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="bookings.xls"'
+
+        # Create XLS file
+        import xlwt
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('Bookings')
+
+        # Write headers
+        for col_num, header in enumerate(dataset.headers):
+            worksheet.write(0, col_num, header)
+
+        # Write data
+        for row_num, row in enumerate(dataset.dict, 1):
+            for col_num, field_name in enumerate(dataset.headers):
+                worksheet.write(row_num, col_num, str(row[field_name]))
+
+        # Save to response
+        workbook.save(response)
+        return response
 
 class VehicleViewSet(viewsets.ModelViewSet):
     queryset = Vehicle.objects.all()
@@ -180,8 +200,29 @@ class VehicleViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def export_excel(self, request):
-        resource = VehicleResource()
+        """
+        Export bookings as Excel
+        """
+        resource = BookingResource()
         dataset = resource.export()
-        response = HttpResponse(dataset.xls, content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment; filename="vehicles.xls"'
+
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="bookings.xls"'
+
+        # Create XLS file
+        import xlwt
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('Bookings')
+
+        # Write headers
+        for col_num, header in enumerate(dataset.headers):
+            worksheet.write(0, col_num, header)
+
+        # Write data
+        for row_num, row in enumerate(dataset.dict, 1):
+            for col_num, field_name in enumerate(dataset.headers):
+                worksheet.write(row_num, col_num, str(row[field_name]))
+
+        # Save to response
+        workbook.save(response)
         return response
