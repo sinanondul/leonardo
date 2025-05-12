@@ -2,9 +2,14 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
+from django.http import HttpResponse
 from datetime import timedelta
 from .models import Booking, Vehicle
 from .serializers import BookingSerializer, VehicleSerializer
+from .resources import BookingResource, VehicleResource
+import csv
+import xlwt
+from io import BytesIO
 
 
 class BookingViewSet(viewsets.ModelViewSet):
@@ -13,9 +18,6 @@ class BookingViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def add_vehicle(self, request, pk=None):
-        """
-        Add a vehicle to this booking
-        """
         booking = self.get_object()
         vehicle_id = request.data.get('vehicle_id')
 
@@ -41,9 +43,6 @@ class BookingViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['delete'])
     def delete_old_vehicles(self, request):
-        """
-        Delete vehicles with booking ship arrival date older than 6 months
-        """
         six_months_ago = timezone.now() - timedelta(days=180)
 
         old_vehicles = Vehicle.objects.filter(
@@ -58,6 +57,22 @@ class BookingViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, methods=['get'])
+    def export_csv(self, request):
+        resource = BookingResource()
+        dataset = resource.export()
+        response = HttpResponse(dataset.csv, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="bookings.csv"'
+        return response
+
+    @action(detail=False, methods=['get'])
+    def export_excel(self, request):
+        resource = BookingResource()
+        dataset = resource.export()
+        response = HttpResponse(dataset.xls, content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="bookings.xls"'
+        return response
+
 
 class VehicleViewSet(viewsets.ModelViewSet):
     queryset = Vehicle.objects.all()
@@ -65,9 +80,6 @@ class VehicleViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def create_vehicle(self, request):
-        """
-        Create a vehicle with specific values using createVehicle function
-        """
         try:
             vin = request.data.get('vin')
             make = request.data.get('make')
@@ -75,14 +87,12 @@ class VehicleViewSet(viewsets.ModelViewSet):
             weight = request.data.get('weight')
             booking_id = request.data.get('booking')
 
-            # Validate required fields
             if not all([vin, make, model, weight]):
                 return Response(
                     {'error': 'Missing required fields. Please provide vin, make, model, and weight.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Get booking if provided
             booking = None
             if booking_id:
                 try:
@@ -93,7 +103,6 @@ class VehicleViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-            # Create vehicle using the model method
             vehicle = Vehicle.createVehicle(
                 vin=vin,
                 make=make,
@@ -110,13 +119,9 @@ class VehicleViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def create_random_vehicle(self, request):
-        """
-        Create a vehicle with random VIN and default values
-        """
         try:
             booking_id = request.data.get('booking')
 
-            # Get booking if provided
             booking = None
             if booking_id:
                 try:
@@ -127,7 +132,6 @@ class VehicleViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-            # Create vehicle with random VIN using the model method
             vehicle = Vehicle.createVehicleRandom(booking=booking)
 
             serializer = self.get_serializer(vehicle)
@@ -138,9 +142,6 @@ class VehicleViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def add_to_booking(self, request, pk=None):
-        """
-        Associate a vehicle with a booking. If booking_id is 0, disassociate from any booking.
-        """
         try:
             vehicle = self.get_object()
             booking_id = request.data.get('booking_id', 0)
@@ -168,3 +169,19 @@ class VehicleViewSet(viewsets.ModelViewSet):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def export_csv(self, request):
+        resource = VehicleResource()
+        dataset = resource.export()
+        response = HttpResponse(dataset.csv, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="vehicles.csv"'
+        return response
+
+    @action(detail=False, methods=['get'])
+    def export_excel(self, request):
+        resource = VehicleResource()
+        dataset = resource.export()
+        response = HttpResponse(dataset.xls, content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="vehicles.xls"'
+        return response

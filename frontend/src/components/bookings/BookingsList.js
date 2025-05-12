@@ -1,57 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container, Typography, Paper, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Button, Dialog,
   DialogTitle, DialogContent, DialogActions, TextField,
-  Grid, IconButton
+  Grid, IconButton, CircularProgress, Alert
 } from '@mui/material';
-import { Add, Edit, Delete } from '@mui/icons-material';
+import { Add, Edit, Delete, Download } from '@mui/icons-material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { bookingAPI } from '../../services/api';
 
 const BookingsList = () => {
-  // Dummy data for bookings
-  const [bookings, setBookings] = useState([
-    {
-      id: 1,
-      booking_number: 'BK001',
-      loading_port: 'Rotterdam',
-      discharge_port: 'New York',
-      ship_departure_date: new Date('2023-12-01T08:00:00'),
-      ship_arrival_date: new Date('2023-12-15T14:00:00'),
-      vehicles_count: 3
-    },
-    {
-      id: 2,
-      booking_number: 'BK002',
-      loading_port: 'Singapore',
-      discharge_port: 'Sydney',
-      ship_departure_date: new Date('2023-12-05T10:00:00'),
-      ship_arrival_date: new Date('2023-12-20T09:00:00'),
-      vehicles_count: 5
-    },
-    {
-      id: 3,
-      booking_number: 'BK003',
-      loading_port: 'Los Angeles',
-      discharge_port: 'Tokyo',
-      ship_departure_date: new Date('2023-12-10T09:00:00'),
-      ship_arrival_date: new Date('2023-12-28T16:00:00'),
-      vehicles_count: 7
-    },
-    {
-      id: 4,
-      booking_number: 'BK004',
-      loading_port: 'Hamburg',
-      discharge_port: 'Dubai',
-      ship_departure_date: new Date('2023-12-15T07:30:00'),
-      ship_arrival_date: new Date('2024-01-05T10:00:00'),
-      vehicles_count: 2
-    }
-  ]);
-
-  // State for dialog
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [open, setOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState({
     booking_number: '',
@@ -62,7 +25,25 @@ const BookingsList = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
 
-  // Open dialog for new booking
+  // Fetch bookings on component mount
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      const response = await bookingAPI.getBookings();
+      setBookings(response.data.results || response.data);
+      setError('');
+    } catch (err) {
+      console.error('Error fetching bookings:', err);
+      setError('Failed to fetch bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAddClick = () => {
     setCurrentBooking({
       booking_number: '',
@@ -75,21 +56,28 @@ const BookingsList = () => {
     setOpen(true);
   };
 
-  // Open dialog for editing
   const handleEditClick = (booking) => {
-    setCurrentBooking({...booking});
+    setCurrentBooking({
+      ...booking,
+      ship_departure_date: new Date(booking.ship_departure_date),
+      ship_arrival_date: new Date(booking.ship_arrival_date)
+    });
     setIsEditing(true);
     setOpen(true);
   };
 
-  // Handle delete
-  const handleDeleteClick = (id) => {
+  const handleDeleteClick = async (id) => {
     if (window.confirm('Are you sure you want to delete this booking?')) {
-      setBookings(bookings.filter(booking => booking.id !== id));
+      try {
+        await bookingAPI.deleteBooking(id);
+        fetchBookings(); // Refresh the list
+      } catch (err) {
+        console.error('Error deleting booking:', err);
+        setError('Failed to delete booking');
+      }
     }
   };
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCurrentBooking({
@@ -98,7 +86,6 @@ const BookingsList = () => {
     });
   };
 
-  // Handle date changes
   const handleDateChange = (name, date) => {
     setCurrentBooking({
       ...currentBooking,
@@ -106,24 +93,80 @@ const BookingsList = () => {
     });
   };
 
-  // Save booking
-  const handleSave = () => {
-    if (isEditing) {
-      // Update existing booking
-      setBookings(bookings.map(booking =>
-        booking.id === currentBooking.id ? currentBooking : booking
-      ));
-    } else {
-      // Add new booking
-      const newBooking = {
+  const handleSave = async () => {
+    try {
+      const bookingData = {
         ...currentBooking,
-        id: Math.max(...bookings.map(b => b.id), 0) + 1,
-        vehicles_count: 0
+        ship_departure_date: currentBooking.ship_departure_date.toISOString(),
+        ship_arrival_date: currentBooking.ship_arrival_date.toISOString()
       };
-      setBookings([...bookings, newBooking]);
+
+      if (isEditing) {
+        await bookingAPI.updateBooking(currentBooking.id, bookingData);
+      } else {
+        await bookingAPI.createBooking(bookingData);
+      }
+
+      setOpen(false);
+      fetchBookings(); // Refresh the list
+    } catch (err) {
+      console.error('Error saving booking:', err);
+      setError('Failed to save booking');
     }
-    setOpen(false);
   };
+
+  const handleDeleteOldVehicles = async () => {
+    if (window.confirm('Are you sure you want to delete all vehicles with bookings older than 6 months?')) {
+      try {
+        await bookingAPI.deleteOldVehicles();
+        alert('Old vehicles deleted successfully');
+        fetchBookings(); // Refresh to update vehicle counts
+      } catch (err) {
+        console.error('Error deleting old vehicles:', err);
+        setError('Failed to delete old vehicles');
+      }
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await bookingAPI.exportBookingsCSV();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'bookings.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Error exporting bookings:', err);
+      setError('Failed to export bookings');
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const response = await bookingAPI.exportBookingsExcel();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'bookings.xls');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Error exporting bookings:', err);
+      setError('Failed to export bookings');
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 3, textAlign: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg">
@@ -131,15 +174,50 @@ const BookingsList = () => {
         Bookings
       </Typography>
 
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<Add />}
-        onClick={handleAddClick}
-        sx={{ mb: 3 }}
-      >
-        Add New Booking
-      </Button>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+          {error}
+        </Alert>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <div>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Add />}
+            onClick={handleAddClick}
+            sx={{ mr: 2 }}
+          >
+            Add New Booking
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<Delete />}
+            onClick={handleDeleteOldVehicles}
+          >
+            Delete Old Vehicles
+          </Button>
+        </div>
+        <div>
+          <Button
+            variant="outlined"
+            startIcon={<Download />}
+            onClick={handleExportCSV}
+            sx={{ mr: 1 }}
+          >
+            Export CSV
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<Download />}
+            onClick={handleExportExcel}
+          >
+            Export Excel
+          </Button>
+        </div>
+      </div>
 
       <TableContainer component={Paper}>
         <Table>
@@ -160,14 +238,14 @@ const BookingsList = () => {
                 <TableCell>{booking.booking_number}</TableCell>
                 <TableCell>{booking.loading_port}</TableCell>
                 <TableCell>{booking.discharge_port}</TableCell>
-                <TableCell>{booking.ship_departure_date.toLocaleString()}</TableCell>
-                <TableCell>{booking.ship_arrival_date.toLocaleString()}</TableCell>
-                <TableCell>{booking.vehicles_count}</TableCell>
+                <TableCell>{new Date(booking.ship_departure_date).toLocaleString()}</TableCell>
+                <TableCell>{new Date(booking.ship_arrival_date).toLocaleString()}</TableCell>
+                <TableCell>{booking.vehicle_count || 0}</TableCell>
                 <TableCell>
-                  <IconButton onClick={() => handleEditClick(booking)}>
+                  <IconButton onClick={() => handleEditClick(booking)} color="primary">
                     <Edit />
                   </IconButton>
-                  <IconButton onClick={() => handleDeleteClick(booking.id)}>
+                  <IconButton onClick={() => handleDeleteClick(booking.id)} color="error">
                     <Delete />
                   </IconButton>
                 </TableCell>

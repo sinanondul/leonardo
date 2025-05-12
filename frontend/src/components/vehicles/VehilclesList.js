@@ -1,96 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container, Typography, Paper, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Button, Dialog,
   DialogTitle, DialogContent, DialogActions, TextField,
-  Grid, IconButton, MenuItem
+  Grid, IconButton, MenuItem, CircularProgress, Alert
 } from '@mui/material';
-import { Add, Edit, Delete } from '@mui/icons-material';
+import { Add, Edit, Delete, Download } from '@mui/icons-material';
+import { vehicleAPI, bookingAPI } from '../../services/api';
 
 const VehiclesList = () => {
-  // Dummy data for vehicles
-  const [vehicles, setVehicles] = useState([
-    {
-      id: 1,
-      vin: '1HGCM82633A123456',
-      make: 'Toyota',
-      model: 'Camry',
-      weight: 1450.5,
-      booking_id: 1
-    },
-    {
-      id: 2,
-      vin: '5YJSA1E20HF176188',
-      make: 'Tesla',
-      model: 'Model S',
-      weight: 2100.75,
-      booking_id: 1
-    },
-    {
-      id: 3,
-      vin: 'WBADT43483G093073',
-      make: 'BMW',
-      model: 'X5',
-      weight: 2200.0,
-      booking_id: 2
-    },
-    {
-      id: 4,
-      vin: 'JH4KA7650NC003125',
-      make: 'Honda',
-      model: 'Accord',
-      weight: 1400.25,
-      booking_id: null
-    }
-  ]);
-
-  // Dummy booking data for dropdown
-  const bookings = [
-    { id: 1, booking_number: 'BK001' },
-    { id: 2, booking_number: 'BK002' },
-    { id: 3, booking_number: 'BK003' },
-    { id: 4, booking_number: 'BK004' }
-  ];
-
-  // State for dialog
+  const [vehicles, setVehicles] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [open, setOpen] = useState(false);
   const [currentVehicle, setCurrentVehicle] = useState({
     vin: '',
     make: '',
     model: '',
     weight: '',
-    booking_id: null
+    booking: null
   });
   const [isEditing, setIsEditing] = useState(false);
 
-  // Open dialog for new vehicle
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [vehiclesResponse, bookingsResponse] = await Promise.all([
+        vehicleAPI.getVehicles(),
+        bookingAPI.getBookings()
+      ]);
+      setVehicles(vehiclesResponse.data.results || vehiclesResponse.data);
+      setBookings(bookingsResponse.data.results || bookingsResponse.data);
+      setError('');
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError('Failed to fetch data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAddClick = () => {
     setCurrentVehicle({
       vin: '',
       make: '',
       model: '',
       weight: '',
-      booking_id: null
+      booking: null
     });
     setIsEditing(false);
     setOpen(true);
   };
 
-  // Open dialog for editing
   const handleEditClick = (vehicle) => {
     setCurrentVehicle({...vehicle});
     setIsEditing(true);
     setOpen(true);
   };
 
-  // Handle delete
-  const handleDeleteClick = (id) => {
+  const handleDeleteClick = async (id) => {
     if (window.confirm('Are you sure you want to delete this vehicle?')) {
-      setVehicles(vehicles.filter(vehicle => vehicle.id !== id));
+      try {
+        await vehicleAPI.deleteVehicle(id);
+        fetchData(); // Refresh the list
+      } catch (err) {
+        console.error('Error deleting vehicle:', err);
+        setError('Failed to delete vehicle');
+      }
     }
   };
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCurrentVehicle({
@@ -99,30 +83,82 @@ const VehiclesList = () => {
     });
   };
 
-  // Save vehicle
-  const handleSave = () => {
-    if (isEditing) {
-      // Update existing vehicle
-      setVehicles(vehicles.map(vehicle =>
-        vehicle.id === currentVehicle.id ? currentVehicle : vehicle
-      ));
-    } else {
-      // Add new vehicle
-      const newVehicle = {
+  const handleSave = async () => {
+    try {
+      const vehicleData = {
         ...currentVehicle,
-        id: Math.max(...vehicles.map(v => v.id), 0) + 1
+        weight: parseFloat(currentVehicle.weight)
       };
-      setVehicles([...vehicles, newVehicle]);
+
+      if (isEditing) {
+        await vehicleAPI.updateVehicle(currentVehicle.id, vehicleData);
+      } else {
+        await vehicleAPI.createCustomVehicle(vehicleData);
+      }
+
+      setOpen(false);
+      fetchData(); // Refresh the list
+    } catch (err) {
+      console.error('Error saving vehicle:', err);
+      setError('Failed to save vehicle');
     }
-    setOpen(false);
   };
 
-  // Get booking number from booking ID
+  const handleCreateRandomVehicle = async () => {
+    try {
+      await vehicleAPI.createRandomVehicle();
+      fetchData(); // Refresh the list
+    } catch (err) {
+      console.error('Error creating random vehicle:', err);
+      setError('Failed to create random vehicle');
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await vehicleAPI.exportVehiclesCSV();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'vehicles.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Error exporting vehicles:', err);
+      setError('Failed to export vehicles');
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const response = await vehicleAPI.exportVehiclesExcel();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'vehicles.xls');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Error exporting vehicles:', err);
+      setError('Failed to export vehicles');
+    }
+  };
+
   const getBookingNumber = (bookingId) => {
     if (!bookingId) return 'Not assigned';
     const booking = bookings.find(b => b.id === bookingId);
     return booking ? booking.booking_number : 'Unknown';
   };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 3, textAlign: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg">
@@ -130,15 +166,49 @@ const VehiclesList = () => {
         Vehicles
       </Typography>
 
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<Add />}
-        onClick={handleAddClick}
-        sx={{ mb: 3 }}
-      >
-        Add New Vehicle
-      </Button>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+          {error}
+        </Alert>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <div>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Add />}
+            onClick={handleAddClick}
+            sx={{ mr: 1 }}
+          >
+            Add New Vehicle
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleCreateRandomVehicle}
+          >
+            Create Random Vehicle
+          </Button>
+        </div>
+        <div>
+          <Button
+            variant="outlined"
+            startIcon={<Download />}
+            onClick={handleExportCSV}
+            sx={{ mr: 1 }}
+          >
+            Export CSV
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<Download />}
+            onClick={handleExportExcel}
+          >
+            Export Excel
+          </Button>
+        </div>
+      </div>
 
       <TableContainer component={Paper}>
         <Table>
@@ -159,12 +229,12 @@ const VehiclesList = () => {
                 <TableCell>{vehicle.make}</TableCell>
                 <TableCell>{vehicle.model}</TableCell>
                 <TableCell>{vehicle.weight}</TableCell>
-                <TableCell>{getBookingNumber(vehicle.booking_id)}</TableCell>
+                <TableCell>{getBookingNumber(vehicle.booking)}</TableCell>
                 <TableCell>
-                  <IconButton onClick={() => handleEditClick(vehicle)}>
+                  <IconButton onClick={() => handleEditClick(vehicle)} color="primary">
                     <Edit />
                   </IconButton>
-                  <IconButton onClick={() => handleDeleteClick(vehicle.id)}>
+                  <IconButton onClick={() => handleDeleteClick(vehicle.id)} color="error">
                     <Delete />
                   </IconButton>
                 </TableCell>
@@ -224,9 +294,9 @@ const VehiclesList = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 select
-                name="booking_id"
+                name="booking"
                 label="Booking"
-                value={currentVehicle.booking_id || ''}
+                value={currentVehicle.booking || ''}
                 onChange={handleInputChange}
                 fullWidth
               >

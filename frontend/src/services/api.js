@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-// Base URL for API requests
-const API_URL = '/api'; // This will use the proxy during development
+const API_URL = 'http://localhost:8000/api';
 
-// Create Axios instance
 const api = axios.create({
   baseURL: API_URL,
   headers: {
