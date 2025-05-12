@@ -5,17 +5,23 @@ import random
 import string
 
 
+from .app_settings import (
+    VIN_VALIDATOR_REGEX, BOOKING_NUMBER_REGEX,
+    DEFAULT_VEHICLE_MAKE, DEFAULT_VEHICLE_MODEL, DEFAULT_VEHICLE_WEIGHT
+)
+
 class Booking(models.Model):
     booking_number = models.CharField(
         max_length=50,
         unique=True,
         validators=[
             RegexValidator(
-                regex=r'^[A-Za-z0-9-]+$',
+                regex=BOOKING_NUMBER_REGEX,
                 message='Booking number must be alphanumeric',
             ),
         ]
     )
+
     loading_port = models.CharField(max_length=100)
     discharge_port = models.CharField(max_length=100)
     ship_arrival_date = models.DateTimeField()
@@ -46,12 +52,13 @@ class Vehicle(models.Model):
         unique=True,
         validators=[
             RegexValidator(
-                regex=r'^[A-HJ-NPR-Z0-9]{17}$',
+                regex=VIN_VALIDATOR_REGEX,
                 message='VIN must be a valid 17-character Vehicle Identification Number',
             ),
         ],
         verbose_name="VIN"
     )
+
     make = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     weight = models.DecimalField(max_digits=8, decimal_places=2, help_text="Weight in kilograms")
@@ -93,10 +100,10 @@ class Vehicle(models.Model):
         valid_chars = string.digits + ''.join([c for c in string.ascii_uppercase if c not in 'IOQ'])
         random_vin = ''.join(random.choice(valid_chars) for _ in range(17))
 
-        # Default values
-        default_make = "Default Make"
-        default_model = "Default Model"
-        default_weight = 1500.00
+        # Use default values from settings
+        default_make = DEFAULT_VEHICLE_MAKE
+        default_model = DEFAULT_VEHICLE_MODEL
+        default_weight = DEFAULT_VEHICLE_WEIGHT
 
         vehicle = cls(
             vin=random_vin,

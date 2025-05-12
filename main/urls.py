@@ -44,6 +44,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('logistics.urls')),  # API endpoints
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    path('api/logistics/', include('logistics.urls', namespace='logistics')),
 ]
 
 # Add Django Debug Toolbar URL patterns if in DEBUG mode

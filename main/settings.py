@@ -67,6 +67,12 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',  # Add this
 ]
 
+LOGISTICS_SETTINGS = {
+    'OLD_VEHICLES_DAYS': 180,  # Days to consider vehicles "old" (6 months)
+    'MAX_VEHICLES_PER_BOOKING': 100,  # Limit vehicles per booking
+    # Other settings...
+}
+
 # Configure debug toolbar
 INTERNAL_IPS = [
     '127.0.0.1',

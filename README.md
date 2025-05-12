@@ -67,3 +67,21 @@ python manage.py runserver
 ```
 
 Open the browser and go to [http://localhost:8000/](http://localhost:8000/)
+
+# Django Vehicle Logistics
+
+A reusable Django app for managing vehicle logistics including bookings and vehicles.
+
+## Features
+
+- Full CRUD operations for bookings and vehicles
+- REST API using Django Rest Framework
+- Vehicle assignment/disassociation functionality
+- Command to delete old vehicles
+- Export data to CSV and Excel
+
+## Installation
+
+1. Install the package:
+```bash
+pip install django-vehicle-logistics
