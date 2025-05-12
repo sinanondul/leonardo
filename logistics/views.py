@@ -70,28 +70,44 @@ class BookingViewSet(viewsets.ModelViewSet):
         """
         Export bookings as Excel
         """
-        resource = BookingResource()
-        dataset = resource.export()
+        import io
+        import xlsxwriter
 
-        response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment; filename="bookings.xls"'
+        # Get all bookings
+        bookings = Booking.objects.all()
 
-        # Create XLS file
-        import xlwt
-        workbook = xlwt.Workbook(encoding='utf-8')
-        worksheet = workbook.add_sheet('Bookings')
+        # Create a workbook and add a worksheet
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output)
+        worksheet = workbook.add_worksheet('Bookings')
 
-        # Write headers
-        for col_num, header in enumerate(dataset.headers):
+        # Add headers
+        headers = ['ID', 'Booking Number', 'Loading Port', 'Discharge Port',
+                   'Departure Date', 'Arrival Date', 'Vehicle Count']
+
+        for col_num, header in enumerate(headers):
             worksheet.write(0, col_num, header)
 
-        # Write data
-        for row_num, row in enumerate(dataset.dict, 1):
-            for col_num, field_name in enumerate(dataset.headers):
-                worksheet.write(row_num, col_num, str(row[field_name]))
+        # Add data
+        for row_num, booking in enumerate(bookings, 1):
+            worksheet.write(row_num, 0, booking.id)
+            worksheet.write(row_num, 1, booking.booking_number)
+            worksheet.write(row_num, 2, booking.loading_port)
+            worksheet.write(row_num, 3, booking.discharge_port)
+            worksheet.write(row_num, 4, booking.ship_departure_date.strftime('%Y-%m-%d %H:%M'))
+            worksheet.write(row_num, 5, booking.ship_arrival_date.strftime('%Y-%m-%d %H:%M'))
+            worksheet.write(row_num, 6, booking.vehicles.count())
 
-        # Save to response
-        workbook.save(response)
+        workbook.close()
+        output.seek(0)
+
+        # Create response
+        response = HttpResponse(
+            output,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=bookings.xlsx'
+
         return response
 
 class VehicleViewSet(viewsets.ModelViewSet):
@@ -201,28 +217,42 @@ class VehicleViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def export_excel(self, request):
         """
-        Export bookings as Excel
+        Export vehicles as Excel
         """
-        resource = BookingResource()
-        dataset = resource.export()
+        import io
+        import xlsxwriter
 
-        response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment; filename="bookings.xls"'
+        # Get all vehicles
+        vehicles = Vehicle.objects.all()
 
-        # Create XLS file
-        import xlwt
-        workbook = xlwt.Workbook(encoding='utf-8')
-        worksheet = workbook.add_sheet('Bookings')
+        # Create a workbook and add a worksheet
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output)
+        worksheet = workbook.add_worksheet('Vehicles')
 
-        # Write headers
-        for col_num, header in enumerate(dataset.headers):
+        # Add headers
+        headers = ['ID', 'VIN', 'Make', 'Model', 'Weight', 'Booking']
+
+        for col_num, header in enumerate(headers):
             worksheet.write(0, col_num, header)
 
-        # Write data
-        for row_num, row in enumerate(dataset.dict, 1):
-            for col_num, field_name in enumerate(dataset.headers):
-                worksheet.write(row_num, col_num, str(row[field_name]))
+        # Add data
+        for row_num, vehicle in enumerate(vehicles, 1):
+            worksheet.write(row_num, 0, vehicle.id)
+            worksheet.write(row_num, 1, vehicle.vin)
+            worksheet.write(row_num, 2, vehicle.make)
+            worksheet.write(row_num, 3, vehicle.model)
+            worksheet.write(row_num, 4, float(vehicle.weight))
+            worksheet.write(row_num, 5, vehicle.booking.booking_number if vehicle.booking else 'Not assigned')
 
-        # Save to response
-        workbook.save(response)
+        workbook.close()
+        output.seek(0)
+
+        # Create response
+        response = HttpResponse(
+            output,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=vehicles.xlsx'
+
         return response

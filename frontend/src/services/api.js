@@ -10,7 +10,7 @@ const api = axios.create({
 });
 
 export const bookingAPI = {
-  getBookings: () => api.get('/bookings/'),
+  getBookings: () => api.get('/bookings/', { params: { limit: 100 } }), // Increase limit
   getBooking: (id) => api.get(`/bookings/${id}/`),
   createBooking: (data) => api.post('/bookings/', data),
   updateBooking: (id, data) => api.put(`/bookings/${id}/`, data),
@@ -26,7 +26,7 @@ export const bookingAPI = {
 };
 
 export const vehicleAPI = {
-  getVehicles: () => api.get('/vehicles/'),
+  getVehicles: (params) => api.get('/vehicles/', { params: { ...params, limit: 100 } }), // Increase limit
   getVehicle: (id) => api.get(`/vehicles/${id}/`),
   createVehicle: (data) => api.post('/vehicles/', data),
   updateVehicle: (id, data) => api.put(`/vehicles/${id}/`, data),
