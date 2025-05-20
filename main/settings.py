@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'debug_toolbar',
     'import_export',
+    'drf_yasg',
+
 
     # Local apps
     'logistics',
@@ -170,7 +172,9 @@ STATIC_ROOT = "/tmp/static"
 STATIC_URL = '/static/'
 
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = [os.path.join(APPS_DIR, "static"),]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'main/static'),
+]
 
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [

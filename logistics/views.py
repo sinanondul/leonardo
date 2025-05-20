@@ -113,6 +113,14 @@ class BookingViewSet(viewsets.ModelViewSet):
 class VehicleViewSet(viewsets.ModelViewSet):
     queryset = Vehicle.objects.all()
     serializer_class = VehicleSerializer
+    
+    #get all vehicles with booking id
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        booking = self.request.query_params.get('booking', None)
+        if booking is not None:
+            queryset = queryset.filter(booking_id=booking)
+        return queryset
 
     @action(detail=False, methods=['post'])
     def create_vehicle(self, request):
@@ -153,8 +161,14 @@ class VehicleViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'], 
+        description="Create a random vehicle with generated data")
     def create_random_vehicle(self, request):
+        """
+        Creates a vehicle with randomly generated data.
+        
+        Optionally associates it with a booking if booking ID is provided.
+        """
         try:
             booking_id = request.data.get('booking')
 

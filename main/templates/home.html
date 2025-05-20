@@ -2,13 +2,30 @@
 <html>
 <head>
     <title>UMTest</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <h1>Welcome to UMTest</h1>
-    <p>Your Django server is running correctly!</p>
-    <ul>
-        <li><a href="/api/">API Endpoints</a></li>
-        <li><a href="/admin/">Admin Panel</a></li>
-    </ul>
+    <div class="container">
+        <h1>Welcome to UMTest</h1>
+        <p>Your Django server is running correctly!</p>
+        <div class="documentation-section">
+            <h2>Documentation</h2>
+            <p>Explore the following sections for more information:</p>
+        <ul>
+            <li><a href="/api/">API Endpoints</a></li>
+            <li><a href="/admin/">Admin Panel</a></li>
+        </ul>
+        </div>
+        
+        <div class="documentation-section">
+            <h2>API Documentation</h2>
+            <p>Access interactive API documentation through these interfaces:</p>
+            <ul>
+                <li><a href="/api/docs/" class="api-link">Swagger UI</a> - Interactive API documentation and testing</li>
+                <li><a href="/api/redoc/" class="api-link redoc">ReDoc UI</a> - Responsive API reference documentation</li>
+            </ul>
+        </div>
+    
 </body>
 </html>
