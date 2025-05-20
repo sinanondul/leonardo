@@ -10,6 +10,7 @@ import Navbar from './components/layout/NavBar';
 import Home from './components/Home';
 import BookingsList from './components/bookings/BookingsList';
 import VehiclesList from './components/vehicles/VehilclesList';
+import BookingsCalendar from './components/calendar/BookingsCalendar';
 
 // Create a theme
 const theme = createTheme();
@@ -26,6 +27,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/bookings" element={<BookingsList />} />
               <Route path="/vehicles" element={<VehiclesList />} />
+              <Route path="/calendar" element={<BookingsCalendar />} />
             </Routes>
           </Box>
           <Box

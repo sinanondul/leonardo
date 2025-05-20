@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box, styled } from '@mui/material';
-import { DirectionsBoat, LocalShipping } from '@mui/icons-material';
+import { DirectionsBoat, LocalShipping, CalendarMonth } from '@mui/icons-material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 // Create a tricolor theme to match the rest of the app
@@ -42,10 +42,12 @@ const Navbar = () => {
   const path = window.location.pathname;
   const isBookingsActive = path.includes('/bookings');
   const isVehiclesActive = path.includes('/vehicles');
+  const isCalendarActive = path.includes('/calendar');
 
   // These refs will help us get the position and width of the buttons
   const bookingBtnRef = React.useRef(null);
   const vehicleBtnRef = React.useRef(null);
+  const calendarBtnRef = React.useRef(null);
 
   // Calculate the indicator position and width
   const getIndicatorStyle = () => {
@@ -59,6 +61,12 @@ const Navbar = () => {
       return {
         width: vehicleBtnRef.current.offsetWidth,
         transform: `translateX(${vehicleBtnRef.current.offsetLeft}px)`,
+      };
+    }
+    else if (isCalendarActive && calendarBtnRef.current) {
+      return {
+        width: calendarBtnRef.current.offsetWidth,
+        transform: `translateX(${calendarBtnRef.current.offsetLeft}px)`,
       };
     }
     return { width: 0, transform: 'translateX(0)' };
@@ -103,6 +111,16 @@ const Navbar = () => {
                 sx={{ fontWeight: isVehiclesActive ? 600 : 500 }}
               >
                 Vehicles
+              </NavButton>
+              <NavButton
+                ref={calendarBtnRef}
+                component={Link}
+                to="/calendar"
+                color="inherit"
+                startIcon={<CalendarMonth />}
+                sx={{ fontWeight: isCalendarActive ? 600 : 500 }}
+              >
+                Calendar
               </NavButton>
             </Box>
             <IndicatorLine sx={getIndicatorStyle()} />

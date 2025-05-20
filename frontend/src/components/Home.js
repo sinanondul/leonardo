@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Typography, Button, Grid, Paper, Box, Card, CardContent, CardActions } from '@mui/material';
-import { DirectionsBoat, LocalShipping } from '@mui/icons-material';
+import { DirectionsBoat, LocalShipping, CalendarMonth } from '@mui/icons-material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 // Create a tricolor theme to match the rest of the app
@@ -147,6 +147,58 @@ const Home = () => {
                     }}
                   >
                     Go to Vehicles
+                  </Button>
+                </CardActions>
+              </Card>
+            </Box>
+
+            {/* Improved Calendar Card */}
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 4, justifyContent: 'center', mt: 4 }}>
+              {/* Calendar Card */}
+              <Card
+                elevation={3}
+                sx={{
+                  flex: 1,
+                  maxWidth: { xs: '100%', sm: '400px' },
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'transform 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'scale(1.02)',
+                  }
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1, textAlign: 'center', pt: 4, pb: 2 }}>
+                  <CalendarMonth
+                    sx={{
+                      fontSize: 80,
+                      color: 'info.main', // Using a different color than the other cards
+                      mb: 2
+                    }}
+                  />
+                  <Typography variant="h5" component="h2" gutterBottom>
+                    Booking Calendar
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ height: '80px', overflow: 'hidden' }}>
+                    View all your bookings in an interactive calendar.
+                    Track arrivals and departures with a visual schedule.
+                  </Typography>
+                </CardContent>
+                <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    component={Link}
+                    to="/calendar"
+                    sx={{
+                      px: 4,
+                      backgroundColor: 'info.main',
+                      '&:hover': {
+                        backgroundColor: 'info.dark',
+                      }
+                    }}
+                  >
+                    View Calendar
                   </Button>
                 </CardActions>
               </Card>

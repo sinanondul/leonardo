@@ -23,6 +23,15 @@ export const bookingAPI = {
     api.get('/bookings/export_csv/', { responseType: 'blob' }),
   exportBookingsExcel: () =>
     api.get('/bookings/export_excel/', { responseType: 'blob' }),
+  getVehicles: async (bookingId) => {
+    try {
+      const response = await axios.get(`/api/bookings/${bookingId}/vehicles/`);
+      return response;
+    } catch (error) {
+      console.error('Error fetching vehicles for booking:', error);
+      throw error;
+    }
+  },
 };
 
 export const vehicleAPI = {
