@@ -43,7 +43,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('logistics.urls')),  # API endpoints
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
-    path('api/logistics/', include('logistics.urls', namespace='logistics')),
+    #path('api/logistics/', include('logistics.urls', namespace='logistics')),
     
     # Swagger documentation URLs
     path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
