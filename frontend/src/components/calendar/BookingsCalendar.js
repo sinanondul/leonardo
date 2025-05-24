@@ -215,12 +215,21 @@ const BookingsCalendar = () => {
 
   const fetchBookingDetails = async (bookingId) => {
     try {
+<<<<<<< HEAD
       // Adapt these API calls based on your actual API structure
       const response = await bookingAPI.getById(bookingId);
       const booking = response.data;
       
       // Get vehicles for this booking
       const vehiclesResponse = await vehicleAPI.getAll({ booking: bookingId });
+=======
+      // Get the booking details
+      const response = await bookingAPI.getBooking(bookingId);
+      const booking = response.data;
+      
+      // Get vehicles for this specific booking using the proper parameter
+      const vehiclesResponse = await vehicleAPI.getVehicles({ booking: bookingId });
+>>>>>>> origin/main
       const vehicles = vehiclesResponse.data;
       
       const bookingWithVehicles = {

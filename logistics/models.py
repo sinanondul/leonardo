@@ -29,6 +29,9 @@ class Booking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-created_at']  # Order by creation date, newest first
+
     def __str__(self):
         return f"Booking {self.booking_number}"
 
@@ -71,6 +74,9 @@ class Vehicle(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']  # Order by creation date, newest first
 
     def __str__(self):
         return f"{self.make} {self.model} ({self.vin})"

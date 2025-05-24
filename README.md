@@ -51,7 +51,7 @@ git clone https://github.com/vilamatica/ultramar-test.git
 
 # Create a virtualenv
 python3.12 -m venv ven
-. venv/bin/activate
+. ven/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt

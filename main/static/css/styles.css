@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background: #f5f7fa;
+    color: #333;
+}
+.container {
+    max-width: 2000px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+h1 {
+    color: #00204e;
+}
+.api-link {
+    display: inline-block;
+    background: #00204e;
+    color: white;
+    padding: 8px 16px;
+    margin: 5px 0;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+}
+.api-link.redoc {
+    background: #0F9D58;
+}
+.api-link:hover {
+    opacity: 0.9;
+}
+ul {
+    padding-left: 20px;
+}
+li {
+    margin-bottom: 10px;
+}
+.documentation-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: #dfc9c9;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
