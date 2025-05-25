@@ -1,7 +1,77 @@
 asgiref==3.8.1
 Django==5.2.1
-django-cors-headers==4.7.0
-django-debug-toolbar==4.4.2
 djangorestframework==3.16.0
+psycopg2-binary==2.9.9
+django-debug-toolbar==4.4.2
+django-cors-headers==4.7.0
 python-decouple==3.8
 sqlparse==0.5.3
+django-import-export==3.3.1
+drf-yasg==1.21.7
+setuptools==69.2.0
+uritemplate==4.1.1
+packaging==24.0
+inflection==0.5.1
+
+
+### Version Requirements
+
+#- Python 3.12+
+#- Django 5.2.x
+#- PostgreSQL 13+
+
+# UMTest - Logistics Management System
+
+A comprehensive logistics management system for tracking shipments, bookings, and vehicles. This application provides a robust platform for managing logistics operations with a clean web interface and powerful REST API.
+
+## Features
+
+- **Comprehensive Management**
+  - Full CRUD operations for bookings and vehicles
+  - Shipment tracking with status updates
+  - Advanced search and filtering capabilities
+  - User role-based permissions
+
+- **REST API Integration**
+  - Complete API built with Django Rest Framework
+  - Interactive API documentation with Swagger/OpenAPI (drf-yasg)
+  - Secure authentication and authorization
+  - Filterable and paginated endpoints
+
+- **Vehicle Functionality**
+  - Vehicle assignment/disassociation to bookings
+  - Vehicle maintenance tracking
+  - Automated command to delete old vehicles from system
+  - Vehicle status monitoring
+
+- **Data Management**
+  - Export data to CSV and Excel formats
+  - Import data from various formats
+  - Data validation and cleaning
+  - Regular database maintenance
+
+- **User Interface**
+  - Responsive design for mobile and desktop
+  - Interactive dashboards
+  - Real-time notifications
+  - Role-based views
+
+## Technical Requirements
+
+- Python 3.12+
+- Django 5.2.x
+- PostgreSQL 13+
+
+## Local Development Setup
+
+### Prerequisites
+- Python 3.12+
+- PostgreSQL (for production-like environment) or SQLite (for simple development)
+
+### Setting Up the Development Environment
+
+1. Create and activate a virtual environment:
+```bash
+python -m venv ven
+source ven/bin/activate
+```
